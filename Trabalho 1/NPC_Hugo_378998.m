@@ -1,19 +1,19 @@
 %% Trabalho 1 - NPC
-% Disciplina de Reconhecimento de Padrões
+% Disciplina de Reconhecimento de Padrï¿½es
 % Hugo Silveira Sousa 378998
 
-%% Limpar variáveis, limpar console, fechar telas
+%% Limpar variï¿½veis, limpar console, fechar telas
 clear; clc; close all; 
 
 %% Carrega a base
 load Classe1.mat;
 load Classe2.mat;
 
-%plot(Classe1) %só pra vê como é
-%plot(Classe2) %só pra vê como é
+%plot(Classe1) %sï¿½ pra vï¿½ como ï¿½
+%plot(Classe2) %sï¿½ pra vï¿½ como ï¿½
 
 %% Extraindo Atributos Classe 1
-at_1_media = (mean(Classe1))'; % Média
+at_1_media = (mean(Classe1))'; % Mï¿½dia
 at_1_desvio = (std(Classe1))'; % Desvio padrao
 at_1_assimetria = (skewness(Classe1))'; % Assimetria
 at_1_curtose = (kurtosis(Classe1))'; % Curtose
@@ -24,8 +24,8 @@ at_1_momento = (moment(Classe1,3))'; % Momento Central de Ordem 3
 atributos_classe1 = [at_1_media, at_1_desvio, at_1_assimetria, at_1_curtose, at_1_momento];
 
 %% Extraindo Atributos Classe 2
-at_2_media = (mean(Classe2))'; % Média
-at_2_desvio = (std(Classe2))'; % Desvio padrão
+at_2_media = (mean(Classe2))'; % Mï¿½dia
+at_2_desvio = (std(Classe2))'; % Desvio padrï¿½o
 at_2_assimetria = (skewness(Classe2))'; % Assimetria
 at_2_curtose = (kurtosis(Classe2))'; % Curtose
 at_2_momento = (moment(Classe2,3))'; % Momento Central de Ordem 3
@@ -34,7 +34,7 @@ at_2_momento = (moment(Classe2,3))'; % Momento Central de Ordem 3
 % e cada coluna um atributo
 atributos_classe2 = [at_2_media, at_2_desvio, at_2_assimetria, at_2_curtose, at_2_momento];
 
-%% Vetor de rótulos
+%% Vetor de rï¿½tulos
 rotulo_classe1 = ones(1,50)'; % vetor de 1's
 rotulo_classe2 = ones(1,50)' + ones(1,50)'; % vetor de 2's
 
@@ -50,12 +50,13 @@ for coluna = 1:5
     end
 end
 
-%% Juntando em uma só matriz base
+%% Juntando em uma sï¿½ matriz base
 rotulo = [rotulo_classe1; rotulo_classe2];
 base = [atributos_padronizado, rotulo];
 %base = [atributos, rotulo]; %TESTE SEM PADRONIZAR
 
 %% Embaralhando as linhas da base
+%{
 rng(0); % Sempre a mesma semente para o rand, para fins de manter os mesmos resultados
 vetor_posicoes_rand = randperm(100);
 
@@ -65,35 +66,36 @@ base_perm = zeros(100,6);
 for cont = 1:quant_de_amostras
    base_perm(cont, :) = base(vetor_posicoes_rand(cont), :);
 end
+%}
 
 %% K-fold
 k_fold = 10; % Dividir a base em 10 partes
-
-quant_de_amostras_por_iteracao = quant_de_amostras/k_fold;
 
 vetor_taxa_de_acerto = zeros(10,1);
 vetor_taxa_de_acerto2 = zeros(10,1);
 
 for iteracao = 1:k_fold
     
-    %% Lógica para pegar parte da base por vez para teste, e o resto para treino
-    inicio_amostra_teste = ((iteracao-1)*quant_de_amostras_por_iteracao) + 1;
-    fim_amostra_teste = iteracao * quant_de_amostras_por_iteracao;
+    %% Lï¿½gica para pegar parte da base por vez para teste, e o resto para treino
+    % sendo que para teste sï¿½o separados 5 amostras da classe 1 e 5 amostras da classe 2
+    % e o resto para treino
+    inicio_amostra_teste_classe_1 = ((iteracao-1)*5) + 1;
+    inicio_amostra_teste_classe_2 = ((iteracao-1)*5) + 51;
+    fim_amostra_teste_classe_1 = iteracao * 5;
+    fim_amostra_teste_classe_2 = (iteracao * 5) + 50;
     
     % Parte separada para teste
-    % base_perm = base % TESTE SEM PERMUTAR 
-    base_teste = base_perm(inicio_amostra_teste:fim_amostra_teste, :);
-    
+    base_teste = [base(inicio_amostra_teste_classe_1:fim_amostra_teste_classe_1, :) ; base(inicio_amostra_teste_classe_2:fim_amostra_teste_classe_2, :)];
     % Pegando o resto para o treino
     if iteracao == 1
-        base_treino = base_perm(fim_amostra_teste+1:100, :);
+        base_treino = [base(fim_amostra_teste_classe_1+1:50, :) ; base(fim_amostra_teste_classe_2+1:100, :)];
     elseif iteracao == 10
-        base_treino = base_perm(1:inicio_amostra_teste-1, :);
+        base_treino = [base(1:inicio_amostra_teste_classe_1-1, :) ; base(51:inicio_amostra_teste_classe_2-1, :)];
     else
-        base_treino = [base_perm(1:inicio_amostra_teste-1,:); base_perm(fim_amostra_teste+1:100, :)];
+        base_treino = [base(1:inicio_amostra_teste_classe_1-1,:);base(fim_amostra_teste_classe_1+1:50, :);base(51:inicio_amostra_teste_classe_2-1,:);base(fim_amostra_teste_classe_2+1:100, :)];
     end
     
-    %% Separando atributos e rótulos de treino e teste
+    %% Separando atributos e rï¿½tulos de treino e teste
     atributos_treino = base_treino(:, 1:5);
     rotulos_treino = base_treino(:, 6);
     
@@ -102,7 +104,7 @@ for iteracao = 1:k_fold
     
     rotulos_previstos_teste = zeros(10,1);
     
-    %% Calculando os centróides de cada atributo das duas classes
+    %% Calculando os centrï¿½ides de cada atributo das duas classes
     soma_classe_1 = zeros(1,5);
     contador_classe_1 = 0;
     
@@ -143,21 +145,21 @@ for iteracao = 1:k_fold
     centroide_classe_2(4) = soma_classe_2(4) / contador_classe_2 ;
     centroide_classe_2(5) = soma_classe_2(5) / contador_classe_2 ;
     
-    %% Plotando os centróides
+    %% Plotando os centrï¿½ides
     
-    % para funcionar deve-se apagar a próxima linha, e descomentar a seção no cálculo de distâncias, e descomentar a seção de plotar os erros
+    % para funcionar deve-se apagar a prï¿½xima linha, e descomentar a seï¿½ï¿½o no cï¿½lculo de distï¿½ncias, e descomentar a seï¿½ï¿½o de plotar os erros
     %{
     
-    % 1 p/ centróide da média
-    % 2 p/ centróide da desvio
-    % 3 p/ centróide da assimetria
-    % 4 p/ centróide da curtorse 
-    % 5 p/ centróide da momento central 3
+    % 1 p/ centrï¿½ide da mï¿½dia
+    % 2 p/ centrï¿½ide da desvio
+    % 3 p/ centrï¿½ide da assimetria
+    % 4 p/ centrï¿½ide da curtorse 
+    % 5 p/ centrï¿½ide da momento central 3
     dim1 = 1;
     dim2 = 4;
     
-    % Vermelho: centróide da parte do treino da classe 1
-    % Azul: centróide da parte de treino da classe 2
+    % Vermelho: centrï¿½ide da parte do treino da classe 1
+    % Azul: centrï¿½ide da parte de treino da classe 2
     % Verde: parte de teste
     
     % Classe 1 'o'
@@ -182,24 +184,24 @@ for iteracao = 1:k_fold
     
     %}
     %% NPC    
-    % Pega uma amostra de teste por vez para os cálculos de distância
+    % Pega uma amostra de teste por vez para os cï¿½lculos de distï¿½ncia
     for i = 1:10
         vetor_teste_atual = atributos_teste(i,:);
         
-        %% Calcula a distância euclidiana do vetor atual 
-        % para os centróides, e guarda dentro de um vetor
+        %% Calcula a distï¿½ncia euclidiana do vetor atual 
+        % para os centrï¿½ides, e guarda dentro de um vetor
         vetor_distancias = zeros(2,1);
         
         vetor_distancias(1) = sqrt(((vetor_teste_atual(1)-centroide_classe_1(1))^2)+((vetor_teste_atual(2)-centroide_classe_1(2))^2)+((vetor_teste_atual(3)-centroide_classe_1(3))^2)+((vetor_teste_atual(4)-centroide_classe_1(4))^2)+((vetor_teste_atual(5)-centroide_classe_1(5))^2)); 
         vetor_distancias(2) = sqrt(((vetor_teste_atual(1)-centroide_classe_2(1))^2)+((vetor_teste_atual(2)-centroide_classe_2(2))^2)+((vetor_teste_atual(3)-centroide_classe_2(3))^2)+((vetor_teste_atual(4)-centroide_classe_2(4))^2)+((vetor_teste_atual(5)-centroide_classe_2(5))^2));            
             
-        %% Testando só duas dimensões, as mesmas dos gráficos
+        %% Testando sï¿½ duas dimensï¿½es, as mesmas dos grï¿½ficos
         %vetor_distancias(1) = sqrt(((vetor_teste_atual(dim1)-centroide_classe_1(dim1))^2)+((vetor_teste_atual(dim2)-centroide_classe_1(dim2))^2)); 
         %vetor_distancias(2) = sqrt(((vetor_teste_atual(dim1)-centroide_classe_2(dim1))^2)+((vetor_teste_atual(dim2)-centroide_classe_2(dim2))^2));            
         
-        %% Previsão
+        %% Previsï¿½o
         
-        % Vê qual centróide mais próximo
+        % Vï¿½ qual centrï¿½ide mais prï¿½ximo
         if vetor_distancias(1) < vetor_distancias(2)
             rotulos_previstos_teste(i) = 1;
         else
@@ -207,11 +209,11 @@ for iteracao = 1:k_fold
         end
         
         %% Plotando os errados
-        % essa parte serve para analisar os erros quando treinado com duas dimensões
-        % as classificações erradas, ficam com um quadrado preto ao redor
-        % antes, deve ser executado a parte que plota os gráficos
+        % essa parte serve para analisar os erros quando treinado com duas dimensï¿½es
+        % as classificaï¿½ï¿½es erradas, ficam com um quadrado preto ao redor
+        % antes, deve ser executado a parte que plota os grï¿½ficos
         
-        % para funcionar apague a próxima linha
+        % para funcionar apague a prï¿½xima linha
         %{
         
         if rotulos_previstos_teste(i) ~= rotulos_teste(i)
@@ -222,7 +224,7 @@ for iteracao = 1:k_fold
         %}
     end
     
-    %% Compara rótulos previstos com os reais
+    %% Compara rï¿½tulos previstos com os reais
     somatorio = sum(rotulos_previstos_teste == rotulos_teste);
     
     taxa_de_acerto = (somatorio/10) * 100;
@@ -232,7 +234,7 @@ for iteracao = 1:k_fold
 
 end
 
-disp("Média das Taxas de Acurácia em %")
+disp("Mï¿½dia das Taxas de Acurï¿½cia em %")
 
-disp("Minha Implementação do NPC")
+disp("Minha Implementaï¿½ï¿½o do NPC")
 disp(sum(vetor_taxa_de_acerto)/10)
